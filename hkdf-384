@@ -1,15 +1,15 @@
 #!/bin/bash
 
-# Perform HKDF with SHA256 hashing - such as might be used for TLS_AES_128_GCM_SHA256
+# Perform HKDF with SHA384 hashing - such as might be used for TLS_AES_256_GCM_SHA384
 
 op=$1
 if [[ "$op" = "extract" ]]; then
 	hexsalt="$2" hexkeymaterial="$3"
 
 	if [[ "$hexsalt" = "" ]]; then
-		hexsalt="0000000000000000000000000000000000000000000000000000000000000000"
+		hexsalt="000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
 	fi
-	echo -en "$hexkeymaterial" | xxd -r -p | openssl dgst -sha256 -mac HMAC -macopt hexkey:"$hexsalt" -hex \
+	echo -en "$hexkeymaterial" | xxd -r -p | openssl dgst -sha384 -mac HMAC -macopt hexkey:"$hexsalt" -hex \
 		| sed -e 's/.* //'
 elif [[ "$op" = "expand" || "$op" = "expandlabel" ]]; then
 	if [[ "$op" = "expand" ]]; then
@@ -31,7 +31,7 @@ elif [[ "$op" = "expand" || "$op" = "expandlabel" ]]; then
 	i=1
 	while [[ $(echo -n "$hexoutput" | wc -c) -lt $hexlength ]]; do
 		hexin=${hexlast}${hexinfo}$(printf "%02x" "$i")
-		hexlast=$(echo -en "$hexin" | xxd -r -p | openssl dgst -sha256 -mac HMAC -macopt hexkey:"$hexprk" -hex \
+		hexlast=$(echo -en "$hexin" | xxd -r -p | openssl dgst -sha384 -mac HMAC -macopt hexkey:"$hexprk" -hex \
 			| sed -e 's/.* //')
 		hexoutput=${hexoutput}${hexlast}
 		let i++
